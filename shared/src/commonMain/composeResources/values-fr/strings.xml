@@ -206,4 +206,26 @@
     <string name="scales_type_major_pentatonic">pentatonique majeure</string>
     <string name="scales_type_minor_pentatonic">pentatonique mineure</string>
     <string name="scales_type_blues">blues</string>
+
+    <!-- Accordeur -->
+    <string name="setup_tuner">Accordeur</string>
+    <string name="tuner_title">Accordeur · %1$s</string>
+    <string name="tuner_back">Retour au manche</string>
+    <string name="tuner_permission_text">L’accordeur écoute le micro pour entendre ta corde. Le son est analysé sur ton téléphone, jamais enregistré ni envoyé.</string>
+    <string name="tuner_permission_button">Autoriser le micro</string>
+    <string name="tuner_permission_denied">Le micro est bloqué. Autorise-le pour Neck Atlas dans les réglages du téléphone.</string>
+    <string name="tuner_mic_unavailable">Le micro n’est pas disponible pour le moment.</string>
+    <string name="tuner_hint">Joue une corde à vide</string>
+    <string name="tuner_hint_target">Joue la corde %1$d</string>
+    <string name="tuner_auto">Auto</string>
+    <string name="tuner_target">Corde %1$d · %2$s</string>
+    <string name="tuner_hz">%1$d,%2$d Hz</string>
+    <string name="tuner_cents">%1$s%2$d ¢</string>
+    <string name="tuner_in_tune">Juste</string>
+    <string name="tuner_too_low">Trop bas : serre la corde</string>
+    <string name="tuner_reference">La = %1$d Hz</string>
+    <string name="tuner_reference_less">Diapason plus bas</string>
+    <string name="tuner_reference_more">Diapason plus haut</string>
+    <string name="tuner_level">Niveau du micro</string>
+    <string name="tuner_too_high">Trop haut : desserre la corde</string>
 </resources>

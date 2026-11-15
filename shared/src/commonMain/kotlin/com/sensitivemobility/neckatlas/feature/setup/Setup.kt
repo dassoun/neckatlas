@@ -9,16 +9,19 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +39,7 @@ import com.sensitivemobility.neckatlas.domain.Instrument
 import com.sensitivemobility.neckatlas.shared.resources.Res
 import com.sensitivemobility.neckatlas.shared.resources.instrument_title
 import com.sensitivemobility.neckatlas.shared.resources.setup_summary
+import com.sensitivemobility.neckatlas.shared.resources.setup_tuner
 import com.sensitivemobility.neckatlas.shared.resources.zone_preset
 import com.sensitivemobility.neckatlas.shared.resources.zone_range
 import com.sensitivemobility.neckatlas.shared.resources.zone_range_open
@@ -79,19 +83,28 @@ fun SetupSummary(instrument: Instrument, zone: FretZone, modifier: Modifier = Mo
     }
 }
 
-/** La feuille des réglages de l'instrument et de la zone, qui monte du bas de l'écran quand [open] est vrai. */
+/**
+ * La feuille des réglages de l'instrument et de la zone, qui monte du bas de l'écran quand [open] est vrai. Avec [onTuner], un
+ * bouton « Accordeur » sous le choix de l'instrument ferme la feuille et appelle [onTuner].
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SetupSheetHost(open: Boolean, onDismiss: () -> Unit, settings: AppSettings, onChange: ((AppSettings) -> AppSettings) -> Unit) {
+fun SetupSheetHost(
+    open: Boolean,
+    onDismiss: () -> Unit,
+    settings: AppSettings,
+    onChange: ((AppSettings) -> AppSettings) -> Unit,
+    onTuner: (() -> Unit)? = null,
+) {
     if (!open) return
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        SetupSheet(settings, onChange)
+        SetupSheet(settings, onChange, onTuner = onTuner?.let { openTuner -> { onDismiss(); openTuner() } })
     }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun SetupSheet(settings: AppSettings, onChange: ((AppSettings) -> AppSettings) -> Unit) {
+private fun SetupSheet(settings: AppSettings, onChange: ((AppSettings) -> AppSettings) -> Unit, onTuner: (() -> Unit)?) {
     Column(
         Modifier.verticalScroll(rememberScrollState()).padding(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -104,6 +117,12 @@ private fun SetupSheet(settings: AppSettings, onChange: ((AppSettings) -> AppSet
                         onClick = { onChange { it.copy(instrument = option) } },
                         label = { Text(option.label()) },
                     )
+                }
+            }
+            if (onTuner != null) {
+                OutlinedButton(onClick = onTuner) {
+                    Icon(Icons.Filled.Mic, contentDescription = null, Modifier.size(18.dp))
+                    Text(stringResource(Res.string.setup_tuner), Modifier.padding(start = 8.dp))
                 }
             }
         }

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Le micro ne sert qu'à l'accordeur : le son est analysé sur le téléphone, jamais enregistré ni envoyé. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+
     <application
         android:name=".NeckAtlasApplication"
         android:allowBackup="true"

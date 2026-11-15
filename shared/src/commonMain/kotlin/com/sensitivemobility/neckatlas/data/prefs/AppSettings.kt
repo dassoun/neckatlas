@@ -28,4 +28,6 @@ data class AppSettings(
     val language: AppLanguage = AppLanguage.SYSTEM,
     /** Un léger retour vibré quand on touche le manche. */
     val haptics: Boolean = true,
+    /** Le diapason de l'accordeur : la fréquence du La4, en Hz. */
+    val tunerReferenceHz: Int = 440,
 )

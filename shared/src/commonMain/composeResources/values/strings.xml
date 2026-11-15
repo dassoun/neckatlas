@@ -206,4 +206,26 @@
     <string name="scales_type_major_pentatonic">major pentatonic</string>
     <string name="scales_type_minor_pentatonic">minor pentatonic</string>
     <string name="scales_type_blues">blues</string>
+
+    <!-- Tuner -->
+    <string name="setup_tuner">Tuner</string>
+    <string name="tuner_title">Tuner · %1$s</string>
+    <string name="tuner_back">Back to the fretboard</string>
+    <string name="tuner_permission_text">The tuner listens to the microphone to hear your string. The sound is analysed on your phone, never recorded or sent.</string>
+    <string name="tuner_permission_button">Allow the microphone</string>
+    <string name="tuner_permission_denied">The microphone is blocked. Allow it for Neck Atlas in the phone’s settings.</string>
+    <string name="tuner_mic_unavailable">The microphone is not available right now.</string>
+    <string name="tuner_hint">Play an open string</string>
+    <string name="tuner_hint_target">Play string %1$d</string>
+    <string name="tuner_auto">Auto</string>
+    <string name="tuner_target">String %1$d · %2$s</string>
+    <string name="tuner_hz">%1$d.%2$d Hz</string>
+    <string name="tuner_cents">%1$s%2$d ¢</string>
+    <string name="tuner_in_tune">In tune</string>
+    <string name="tuner_too_low">Too low: tighten the string</string>
+    <string name="tuner_reference">A = %1$d Hz</string>
+    <string name="tuner_reference_less">Lower reference pitch</string>
+    <string name="tuner_reference_more">Higher reference pitch</string>
+    <string name="tuner_level">Microphone level</string>
+    <string name="tuner_too_high">Too high: loosen the string</string>
 </resources>

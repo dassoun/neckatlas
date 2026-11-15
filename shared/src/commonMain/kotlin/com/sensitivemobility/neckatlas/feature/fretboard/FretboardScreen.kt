@@ -40,6 +40,7 @@ import com.sensitivemobility.neckatlas.domain.FretPosition
 import com.sensitivemobility.neckatlas.domain.NoteNames
 import com.sensitivemobility.neckatlas.feature.setup.SetupSheetHost
 import com.sensitivemobility.neckatlas.feature.setup.SetupSummary
+import com.sensitivemobility.neckatlas.feature.tuner.TunerScreen
 import com.sensitivemobility.neckatlas.shared.resources.Res
 import com.sensitivemobility.neckatlas.shared.resources.info_details
 import com.sensitivemobility.neckatlas.shared.resources.info_details_open
@@ -72,9 +73,16 @@ fun FretboardScreen(settings: AppSettings, onChange: ((AppSettings) -> AppSettin
     var showNames by rememberSaveable { mutableStateOf(false) }
     var setupOpen by rememberSaveable { mutableStateOf(false) }
 
+    var tunerOpen by rememberSaveable { mutableStateOf(false) }
+
     val board = remember(instrument) { Fretboard(instrument) }
     // Un emplacement hors de la zone n'est pas montré (il revient si l'on élargit la zone).
     val selected = decodePosition(selectedCode)?.takeIf { it.fret in zone }
+
+    if (tunerOpen) {
+        TunerScreen(settings, onChange, notes, onClose = { tunerOpen = false })
+        return
+    }
 
     Column(Modifier.fillMaxSize().padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SetupSummary(instrument, zone, onClick = { setupOpen = true })
@@ -106,7 +114,7 @@ fun FretboardScreen(settings: AppSettings, onChange: ((AppSettings) -> AppSettin
         )
     }
 
-    SetupSheetHost(open = setupOpen, onDismiss = { setupOpen = false }, settings = settings, onChange = onChange)
+    SetupSheetHost(open = setupOpen, onDismiss = { setupOpen = false }, settings = settings, onChange = onChange, onTuner = { tunerOpen = true })
 }
 
 /** Les douze notes à éclairer sur le manche, plus un bouton qui affiche le nom de toutes les notes. */

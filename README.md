@@ -46,6 +46,11 @@ Faites :
   fondamentale en ambre : toutes dans la zone de travail, ou une **position** à la fois (quatre cases, sans bouger la main :
   sept positions pour une gamme de sept notes, cinq pour une pentatonique), les cases voisines en filigrane pour situer la
   main. « Jouer la gamme » la fait monter sur une octave (ou toute la position choisie) ; toucher une case fait entendre sa note.
+- **Accordeur** (onglet Manche, bouton en haut à droite, puis « Accordeur » sous le choix de l'instrument) : l'appli écoute
+  le micro et montre la note de la corde jouée, sa fréquence et l'écart en cents sur une jauge (« Juste » sous 5 cents). En
+  « Auto » l'accordeur reconnaît la corde la plus proche ; toucher une corde la vise et la fait entendre, pour accorder à
+  l'oreille. Marche pour les quatre instruments, basse 5 cordes comprise. Le son est analysé sur le téléphone, jamais
+  enregistré ni envoyé ; la permission du micro n'est demandée qu'à l'ouverture de l'accordeur.
 - **Quiz** (onglet Quiz) : trois exercices sur le manche debout, dans la zone de travail choisie.
   « **Trouver sur une corde** » (la note à trouver s'affiche en gros dans une pastille, la corde est cernée sur le manche, on touche la case),
   « **Trouver n'importe où** » (une fenêtre de 4 cases sur 3 cordes voisines, tirée au sort et toujours garantie de contenir la note, est éclairée ; le reste du manche est assombri et ignore les touchers) et « **Nommer la note** » (une case
@@ -125,6 +130,8 @@ Code commun (`shared/src/commonMain/kotlin/com/sensitivemobility/neckatlas`) :
   des onglets) et les écrans. `feature/progress/` : les statistiques. `feature/settings/` : les réglages.
 - `ui/` : thème, écran de démarrage, textes des choix, et les briques que partagent Accords et Gammes (`Controls.kt` :
   champ à flèches, bouton d'écoute, carte d'information, feuille de choix de la fondamentale et du type).
+- `domain/tuner/` : `PitchDetector` (YIN), `Tuning` (cents, corde la plus proche) et `PitchSmoother`. `audio/AudioInput.kt` : le micro
+  (AudioRecord sur Android, AVAudioEngine sur iOS) et la permission. `feature/tuner/` : `TunerController` et l'écran.
 - `AppContainer` : les services partagés, créés par chaque plateforme.
 
 ### Ajouter un écran
@@ -156,6 +163,24 @@ vues d'une autre fondamentale. La position n commence sur le n-ième degré de l
 (position 1 = la fondamentale, position 2 = le degré suivant…), et couvre quatre cases (`WINDOW_FRETS`) sur toutes les cordes : sept positions pour sept notes, cinq pour une pentatonique, six pour le
 blues. Le dessin se répète à la douzième case. Les noms des notes suivent le réglage « altérations » : avec « dièses et bémols
 ensemble », le Mi♭ du Do dorien s'écrit « Ré♯/Mi♭ » (l'orthographe propre à chaque tonalité n'est pas faite).
+
+## Accordeur
+
+**Détection** (`domain/tuner/PitchDetector.kt`). L'algorithme YIN : une autocorrélation corrigée qui évite de prendre l'octave au-dessus
+ou au-dessous, ce qui compte pour la corde grave d'une basse (presque toute l'énergie est dans les harmoniques 2 et 3). Le micro
+rend une fenêtre de 8192 échantillons (~186 ms à 44,1 kHz) toutes les 2048 (~46 ms) ; la période est affinée par une parabole
+et la précision passe sous le cent. Le silence (niveau trop bas) et les sons sans hauteur nette donnent « rien ». Une médiane
+des cinq dernières mesures (`PitchSmoother`) calme l'aiguille. La plage cherchée suit l'instrument : de 0,8 fois la corde la
+plus grave à 1,6 fois la plus aiguë. Les tests (`TunerTest`) utilisent des sons calculés : chaque corde à vide des quatre
+instruments à moins d'un cent, une corde désaccordée de -30 à +25 cents, une basse à fondamentale faible, du bruit de fond.
+
+**Diapason.** La = 440 Hz par défaut, réglable de 430 à 450 Hz (boutons − et + sous les cordes, enregistré avec les réglages). Le micro utilise la source Android « non traitée » quand elle existe : la suppression de bruit du téléphone prend sinon une note tenue pour du bruit et l'éteint. L'affichage garde la dernière mesure environ une demi-seconde quand le son devient trop faible.
+
+**Limites.** Pas de mesure en continu hors des cordes à vide (c'est un accordeur, pas
+un analyseur). Le micro d'un téléphone et la justesse réelle d'une guitare n'ont été vérifiés qu'avec ces sons calculés :
+à confirmer sur l'instrument. Côté iOS, `AudioInput.ios.kt` n'a jamais été compilé et l'appli iOS devra déclarer
+`NSMicrophoneUsageDescription`. Google Play : la permission `RECORD_AUDIO` demande une déclaration dans la fiche de
+l'appli (le micro ne sert qu'à l'accordeur, rien n'est enregistré ni envoyé).
 
 ## Commandes
 

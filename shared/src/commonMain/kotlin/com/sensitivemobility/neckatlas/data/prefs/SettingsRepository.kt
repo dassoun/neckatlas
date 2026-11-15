@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.sensitivemobility.neckatlas.domain.AccidentalStyle
 import com.sensitivemobility.neckatlas.domain.FretZone
+import com.sensitivemobility.neckatlas.domain.tuner.Tuning
 import com.sensitivemobility.neckatlas.domain.Instrument
 import com.sensitivemobility.neckatlas.domain.NoteNotation
 import com.sensitivemobility.neckatlas.domain.quiz.QuizConfig
@@ -41,6 +42,7 @@ private object Keys {
     val theme = stringPreferencesKey("theme")
     val language = stringPreferencesKey("language")
     val haptics = booleanPreferencesKey("haptics")
+    val tunerReference = intPreferencesKey("tuner_reference")
 }
 
 class SettingsRepository internal constructor(private val store: DataStore<Preferences>) {
@@ -86,6 +88,7 @@ private fun Preferences.toSettings(): AppSettings {
         theme = readEnum(Keys.theme, defaults.theme),
         language = readEnum(Keys.language, defaults.language),
         haptics = this[Keys.haptics] ?: defaults.haptics,
+        tunerReferenceHz = (this[Keys.tunerReference] ?: defaults.tunerReferenceHz).coerceIn(Tuning.REFERENCE_RANGE),
     )
 }
 
@@ -106,4 +109,5 @@ private fun MutablePreferences.write(settings: AppSettings) {
     this[Keys.theme] = settings.theme.name
     this[Keys.language] = settings.language.name
     this[Keys.haptics] = settings.haptics
+    this[Keys.tunerReference] = settings.tunerReferenceHz.coerceIn(Tuning.REFERENCE_RANGE)
 }
