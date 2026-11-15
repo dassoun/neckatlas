@@ -45,6 +45,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +53,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.sensitivemobility.neckatlas.data.prefs.AppSettings
 import com.sensitivemobility.neckatlas.domain.AccidentalStyle
@@ -87,6 +89,9 @@ import com.sensitivemobility.neckatlas.shared.resources.quiz_done
 import com.sensitivemobility.neckatlas.shared.resources.quiz_last_score
 import com.sensitivemobility.neckatlas.shared.resources.quiz_exercise_title
 import com.sensitivemobility.neckatlas.shared.resources.quiz_feedback_correct
+import com.sensitivemobility.neckatlas.shared.resources.quiz_find_in_window
+import com.sensitivemobility.neckatlas.shared.resources.quiz_find_on_string
+import com.sensitivemobility.neckatlas.shared.resources.quiz_find_on_string_open
 import com.sensitivemobility.neckatlas.shared.resources.quiz_feedback_wrong
 import com.sensitivemobility.neckatlas.shared.resources.quiz_length_title
 import com.sensitivemobility.neckatlas.shared.resources.quiz_notes_all
@@ -416,6 +421,7 @@ private fun QuizRunningContent(controller: QuizController, phase: QuizPhase.Runn
             enabled = tapsAllowed,
             markers = markers,
             emphasizedStrings = emphasizedStringsFor(question),
+            focus = (question as? Question.Find)?.area,
             modifier = Modifier.weight(1f).fillMaxWidth().padding(bottom = if (question is Question.Find || question is Question.PlaceChord) 8.dp else 0.dp),
         )
         when (question) {
@@ -499,7 +505,28 @@ private fun QuestionCard(phase: QuizPhase.Running, settings: AppSettings) {
             .padding(horizontal = 16.dp, vertical = 12.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
-        Text(text, style = MaterialTheme.typography.titleMedium, color = textColor)
+        if (feedback == null && question is Question.Find) {
+            // La note à trouver en gros, dans une pastille : impossible de la prendre pour la corde ou sa note à vide.
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    Modifier.defaultMinSize(minWidth = 56.dp, minHeight = 56.dp).clip(RoundedCornerShape(16.dp)).background(colors.primary).padding(horizontal = 10.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(rootName, fontSize = 26.sp, fontWeight = FontWeight.Bold, color = colors.onPrimary, maxLines = 1)
+                }
+                Column(Modifier.padding(start = 14.dp)) {
+                    if (question.string != null) {
+                        val open = NoteNames.label(instrument.openStrings[question.string].pitchClass, settings.notation, settings.accidentals)
+                        Text(stringResource(Res.string.quiz_find_on_string, instrument.stringNumber(question.string)), style = MaterialTheme.typography.titleMedium, color = textColor)
+                        Text(stringResource(Res.string.quiz_find_on_string_open, open), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                    } else {
+                        Text(stringResource(Res.string.quiz_find_in_window), style = MaterialTheme.typography.titleMedium, color = textColor)
+                    }
+                }
+            }
+        } else {
+            Text(text, style = MaterialTheme.typography.titleMedium, color = textColor)
+        }
     }
 }
 

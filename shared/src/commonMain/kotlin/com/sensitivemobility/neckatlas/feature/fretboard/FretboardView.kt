@@ -45,6 +45,7 @@ import com.sensitivemobility.neckatlas.domain.FretZone
 import com.sensitivemobility.neckatlas.domain.Instrument
 import com.sensitivemobility.neckatlas.domain.NoteNames
 import com.sensitivemobility.neckatlas.domain.NoteNotation
+import com.sensitivemobility.neckatlas.domain.quiz.FretArea
 import com.sensitivemobility.neckatlas.ui.CorrectColor
 import com.sensitivemobility.neckatlas.ui.LocalAccentColors
 import com.sensitivemobility.neckatlas.ui.LocalHapticsEnabled
@@ -252,6 +253,7 @@ private fun makeLook(geometry: NeckGeometry, instrument: Instrument): NeckLook {
  * a pas, sur une rangée d'en-tête ajoutée au-dessus de la première case.
  * @param bars barrés à dessiner sous les pastilles.
  * @param emphasizedStrings cordes (indices, 0 = la plus grave) sur lesquelles on interroge : elles sont surlignées.
+ * @param focus fenêtre où l'on doit répondre : le reste du manche est assombri et les touchers qui tombent dehors sont ignorés.
  * @param touchFeedback faux : ni vibration de la corde ni retour vibré (une carte à consulter plutôt qu'un instrument à jouer).
  */
 @Composable
@@ -269,6 +271,7 @@ fun FretboardView(
     markers: List<NeckMarker> = emptyList(),
     bars: List<NeckBar> = emptyList(),
     emphasizedStrings: Set<Int> = emptySet(),
+    focus: FretArea? = null,
     touchFeedback: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
@@ -323,10 +326,11 @@ fun FretboardView(
         Canvas(
             Modifier
                 .fillMaxSize()
-                .pointerInput(geometry, enabled, touchFeedback, hapticsOn) {
+                .pointerInput(geometry, enabled, touchFeedback, hapticsOn, focus) {
                     if (enabled) {
                         detectTapGestures { offset ->
                             val position = geometry.hit(offset.x, offset.y) ?: return@detectTapGestures
+                            if (focus != null && position !in focus) return@detectTapGestures
                             currentOnSelect(position)
                             if (touchFeedback) {
                                 tapped = position
@@ -380,16 +384,14 @@ fun FretboardView(
             }
             if (!zone.includesOpenStrings) drawFretWire(geometry.boundaryY(0), left, right, dpf)
 
-            // Corde interrogée par le quiz : une bande claire derrière elle.
+            // Corde interrogée par le quiz : une bande claire derrière elle, bien cernée.
             for (string in emphasizedStrings) {
                 if (string !in 0 until geometry.stringCount) continue
                 val band = geometry.stringGap * 0.9f
-                drawRoundRect(
-                    color = BandColor.copy(alpha = 0.30f),
-                    topLeft = Offset(geometry.stringX(string) - band / 2, neckTop),
-                    size = Size(band, geometry.bottom - neckTop),
-                    cornerRadius = CornerRadius(8 * dpf),
-                )
+                val topLeft = Offset(geometry.stringX(string) - band / 2, neckTop)
+                val size = Size(band, geometry.bottom - neckTop)
+                drawRoundRect(BandColor.copy(alpha = 0.42f), topLeft, size, CornerRadius(8 * dpf))
+                drawRoundRect(BandColor.copy(alpha = 0.95f), topLeft, size, CornerRadius(8 * dpf), style = Stroke(2f * dpf))
             }
 
             // Cordes : plus épaisses vers le grave, filées pour les graves. Celle qu'on vient de toucher vibre.
@@ -418,6 +420,24 @@ fun FretboardView(
             }
             if (vibrating != null && vibrating in 0 until geometry.stringCount) {
                 drawVibratingString(geometry, look.strings[vibrating], vibrating, vibrationProgress)
+            }
+
+            // Fenêtre de réponse : le reste du manche est assombri, la fenêtre cernée.
+            if (focus != null) {
+                val firstRow = geometry.frets.indexOfFirst { it >= focus.zone.first }.coerceAtLeast(0)
+                val lastRow = geometry.frets.indexOfLast { it <= focus.zone.last }.coerceAtLeast(firstRow)
+                val xa = geometry.stringX(focus.firstString)
+                val xb = geometry.stringX(focus.lastString)
+                val x0 = minOf(xa, xb) - geometry.stringGap / 2
+                val x1 = maxOf(xa, xb) + geometry.stringGap / 2
+                val y0 = geometry.boundaryY(firstRow)
+                val y1 = geometry.boundaryY(lastRow + 1)
+                val veil = Color(0xFF05090F).copy(alpha = 0.62f)
+                drawRect(veil, Offset(left, neckTop), Size(geometry.neckWidth, y0 - neckTop))
+                drawRect(veil, Offset(left, y1), Size(geometry.neckWidth, geometry.bottom - y1))
+                drawRect(veil, Offset(left, y0), Size(x0 - left, y1 - y0))
+                drawRect(veil, Offset(x1, y0), Size(right - x1, y1 - y0))
+                drawRoundRect(BandColor, Offset(x0, y0), Size(x1 - x0, y1 - y0), CornerRadius(6 * dpf), style = Stroke(2.5f * dpf))
             }
 
             // Numéros de cases, dans la marge de gauche.

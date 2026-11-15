@@ -71,8 +71,11 @@ sealed interface Question {
     /** La famille de l'accord interrogé, ou null pour les questions sur les notes. */
     val chordQuality: ChordQuality? get() = null
 
-    /** Trouver la note sur le manche : sur la corde [string] si elle est donnée, sinon n'importe où dans la zone. */
-    data class Find(override val pitchClass: Int, val string: Int?) : Question
+    /**
+     * Trouver la note sur le manche : sur la corde [string] si elle est donnée, sinon n'importe où dans la zone, ou dans
+     * [area] quand une fenêtre plus petite que la zone est donnée (elle contient toujours au moins une case juste).
+     */
+    data class Find(override val pitchClass: Int, val string: Int?, val area: FretArea? = null) : Question
 
     /** Nommer la note de la case [position]. */
     data class Name(val position: FretPosition, override val pitchClass: Int) : Question
@@ -96,6 +99,12 @@ sealed interface Question {
     }
 }
 
+/** Une fenêtre du manche : des cases [zone] et des cordes voisines, de [firstString] à [lastString] (0 = la plus grave). */
+data class FretArea(val zone: FretZone, val firstString: Int, val lastString: Int) {
+    operator fun contains(position: FretPosition): Boolean =
+        position.fret in zone && position.string in firstString..lastString
+}
+
 /** Les notes sans altération, en classes de hauteur. */
 val NaturalPitchClasses: List<Int> = listOf(0, 2, 4, 5, 7, 9, 11)
 
@@ -103,12 +112,31 @@ val NaturalPitchClasses: List<Int> = listOf(0, 2, 4, 5, 7, 9, 11)
 object QuizRules {
     /** Toutes les cases de la zone qui répondent à la question. */
     fun correctPositions(board: Fretboard, zone: FretZone, question: Question.Find): List<FretPosition> =
-        board.positionsOf(question.pitchClass, zone).filter { question.string == null || it.string == question.string }
+        board.positionsOf(question.pitchClass, zone)
+            .filter { question.string == null || it.string == question.string }
+            .filter { question.area == null || it in question.area }
 
     fun isCorrect(board: Fretboard, zone: FretZone, question: Question.Find, position: FretPosition): Boolean =
         position.fret in zone &&
             board.pitchAt(position).pitchClass == question.pitchClass &&
-            (question.string == null || position.string == question.string)
+            (question.string == null || position.string == question.string) &&
+            (question.area == null || position in question.area)
+
+    /** La fenêtre des questions « n'importe où » : quatre cases sur trois cordes voisines. */
+    const val AREA_FRETS = 4
+    const val AREA_STRINGS = 3
+
+    /**
+     * Une fenêtre de [AREA_FRETS] cases et [AREA_STRINGS] cordes voisines (moins si la zone ou l'instrument sont plus petits) qui
+     * contient [target] : la note y est donc toujours accessible. Sa place autour de [target] est tirée au sort.
+     */
+    fun areaAround(board: Fretboard, zone: FretZone, target: FretPosition, random: Random): FretArea {
+        val width = minOf(AREA_FRETS, zone.last - zone.first + 1)
+        val firstFret = random.nextInt(maxOf(zone.first, target.fret - width + 1), minOf(target.fret, zone.last - width + 1) + 1)
+        val count = minOf(AREA_STRINGS, board.instrument.stringCount)
+        val firstString = random.nextInt(maxOf(0, target.string - count + 1), minOf(target.string, board.instrument.stringCount - count) + 1)
+        return FretArea(FretZone(firstFret, firstFret + width - 1), firstString, firstString + count - 1)
+    }
 
     fun isCorrect(question: Question.Name, pitchClass: Int): Boolean = question.pitchClass == pitchClass
 
@@ -198,7 +226,14 @@ class QuestionGenerator(
         }
     }
 
-    override fun next(previous: Question?): Question = draw(all, previous, random) { weight(it.pitchClass) * positionFactor(it) }
+    override fun next(previous: Question?): Question {
+        // Les questions « n'importe où » sont dressées sans fenêtre : on compare la précédente sans la sienne, puis on en tire une.
+        val before = if (previous is Question.Find) previous.copy(area = null) else previous
+        val question = draw(all, before, random) { weight(it.pitchClass) * positionFactor(it) }
+        if (config.mode != QuizMode.FIND_ANYWHERE || question !is Question.Find) return question
+        val target = board.positionsOf(question.pitchClass, zone).random(random)
+        return question.copy(area = QuizRules.areaAround(board, zone, target, random))
+    }
 
     /**
      * Le poids de la case visée par une question : la case montrée pour « nommer », la plus faible des cases possibles pour

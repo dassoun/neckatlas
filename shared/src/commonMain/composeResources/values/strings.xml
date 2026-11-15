@@ -33,7 +33,7 @@
     <string name="quiz_mode_find_anywhere">Find anywhere</string>
     <string name="quiz_mode_name_note">Name the note</string>
     <string name="quiz_mode_find_on_string_desc">You get a note and a string: tap the right fret.</string>
-    <string name="quiz_mode_find_anywhere_desc">You get a note: tap it anywhere in the zone.</string>
+    <string name="quiz_mode_find_anywhere_desc">You get a note: tap it inside the small lit window (4 frets, 3 adjacent strings).</string>
     <string name="quiz_mode_name_note_desc">A fret lights up: pick the name of its note.</string>
     <string name="quiz_mode_short_find_on_string">On a string</string>
     <string name="quiz_mode_short_find_anywhere">Anywhere</string>
@@ -73,6 +73,9 @@
     <string name="quiz_adaptive_hint">The notes you miss come back more often.</string>
     <string name="quiz_adaptive_hint_chords">The chord types you miss come back more often.</string>
     <string name="quiz_question_find_on_string">Where is %1$s on string %2$d (%3$s)?</string>
+    <string name="quiz_find_on_string">Find this note on string %1$d</string>
+    <string name="quiz_find_on_string_open">the string played open: %1$s</string>
+    <string name="quiz_find_in_window">Find this note in the lit window</string>
     <string name="quiz_question_find_anywhere">Find %1$s in the zone</string>
     <string name="quiz_question_name_note">Which note is this?</string>
     <string name="quiz_feedback_correct">Correct!</string>

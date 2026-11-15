@@ -181,4 +181,38 @@ class QuestionGeneratorTest {
         assertTrue(QuizRules.isCorrect(naming, 5))
         assertTrue(!QuizRules.isCorrect(naming, 6))
     }
+
+    @Test
+    fun anywhereQuestionsComeWithASmallWindowThatAlwaysContainsTheNote() {
+        for (instrument in listOf(Instrument.GUITAR_6, Instrument.BASS_4, Instrument.GUITAR_7)) {
+            val board = Fretboard(instrument)
+            for (zone in listOf(FretZone(0, 12), FretZone(5, 8), FretZone(0, 2), FretZone(10, 24))) {
+                val generator = QuestionGenerator(board, zone, QuizConfig(mode = QuizMode.FIND_ANYWHERE, naturalsOnly = false), random = Random(5))
+                var previous: Question? = null
+                repeat(200) {
+                    val question = generator.next(previous) as Question.Find
+                    val area = question.area!!
+                    assertTrue(area.zone.first >= zone.first && area.zone.last <= zone.last, "$zone $area")
+                    assertTrue(area.zone.last - area.zone.first + 1 <= QuizRules.AREA_FRETS)
+                    assertTrue(area.lastString - area.firstString + 1 <= QuizRules.AREA_STRINGS)
+                    assertTrue(area.firstString >= 0 && area.lastString < instrument.stringCount)
+                    val right = QuizRules.correctPositions(board, zone, question)
+                    assertTrue(right.isNotEmpty(), "aucune case juste : $instrument $zone $question")
+                    assertTrue(right.all { it in area })
+                    assertTrue(right.all { QuizRules.isCorrect(board, zone, question, it) })
+                    previous = question
+                }
+            }
+        }
+    }
+
+    @Test
+    fun aTapOutsideTheWindowIsWrongEvenOnTheRightNote() {
+        val board = Fretboard(Instrument.GUITAR_6)
+        val zone = FretZone(0, 12)
+        val question = Question.Find(pitchClass = 9, string = null, area = FretArea(FretZone(3, 6), 1, 3))
+        assertTrue(QuizRules.isCorrect(board, zone, question, FretPosition(1, 0)).not()) // La à vide, hors fenêtre
+        assertTrue(QuizRules.isCorrect(board, zone, question, FretPosition(3, 2)).not()) // La de la corde de Sol, case 2 : hors fenêtre
+        assertTrue(QuizRules.correctPositions(board, zone, question).all { it in question.area!! })
+    }
 }

@@ -33,7 +33,7 @@
     <string name="quiz_mode_find_anywhere">Trouver n’importe où</string>
     <string name="quiz_mode_name_note">Nommer la note</string>
     <string name="quiz_mode_find_on_string_desc">On te donne une note et une corde : touche la bonne case.</string>
-    <string name="quiz_mode_find_anywhere_desc">On te donne une note : touche-la où tu veux dans la zone.</string>
+    <string name="quiz_mode_find_anywhere_desc">On te donne une note : touche-la dans la petite fenêtre éclairée (4 cases, 3 cordes voisines).</string>
     <string name="quiz_mode_name_note_desc">Une case s’allume : choisis le nom de sa note.</string>
     <string name="quiz_mode_short_find_on_string">Sur une corde</string>
     <string name="quiz_mode_short_find_anywhere">Partout</string>
@@ -73,6 +73,9 @@
     <string name="quiz_adaptive_hint">Les notes que tu rates reviennent plus souvent.</string>
     <string name="quiz_adaptive_hint_chords">Les types d’accords que tu rates reviennent plus souvent.</string>
     <string name="quiz_question_find_on_string">Où est le %1$s sur la corde %2$d (%3$s) ?</string>
+    <string name="quiz_find_on_string">Trouve cette note sur la corde %1$d</string>
+    <string name="quiz_find_on_string_open">la corde à vide donne : %1$s</string>
+    <string name="quiz_find_in_window">Trouve cette note dans la fenêtre éclairée</string>
     <string name="quiz_question_find_anywhere">Trouve un %1$s dans la zone</string>
     <string name="quiz_question_name_note">Quelle est cette note ?</string>
     <string name="quiz_feedback_correct">Juste !</string>

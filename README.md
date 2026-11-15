@@ -47,8 +47,8 @@ Faites :
   sept positions pour une gamme de sept notes, cinq pour une pentatonique), les cases voisines en filigrane pour situer la
   main. « Jouer la gamme » la fait monter sur une octave (ou toute la position choisie) ; toucher une case fait entendre sa note.
 - **Quiz** (onglet Quiz) : trois exercices sur le manche debout, dans la zone de travail choisie.
-  « **Trouver sur une corde** » (« Où est le La sur la corde 4 (Ré) ? » : la corde est surlignée, on touche la case),
-  « **Trouver n'importe où** » (n'importe quelle case de la zone qui donne la note) et « **Nommer la note** » (une case
+  « **Trouver sur une corde** » (la note à trouver s'affiche en gros dans une pastille, la corde est cernée sur le manche, on touche la case),
+  « **Trouver n'importe où** » (une fenêtre de 4 cases sur 3 cordes voisines, tirée au sort et toujours garantie de contenir la note, est éclairée ; le reste du manche est assombri et ignore les touchers) et « **Nommer la note** » (une case
   porte un « ? », on choisit son nom ; la note est jouée à l'oreille). Réglable : cordes interrogées (une ou plusieurs),
   notes naturelles ou toutes, 10 ou 20 questions, ou 60 secondes. Après chaque réponse : correction en vert et rouge, la
   bonne note jouée après une erreur. Bilan de la série (score, temps moyen, durée, notes ratées) et « Rejouer ». Le dernier
