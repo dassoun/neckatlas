@@ -1,0 +1,31 @@
+[versions]
+agp = "9.5.1"
+kotlin = "2.4.20"
+composeMultiplatform = "1.12.0"
+datastore = "1.2.1"
+coroutines = "1.11.0"
+datetime = "0.8.0"
+activityCompose = "1.13.0"
+coreSplashscreen = "1.2.0"
+okio = "3.18.2"
+composeIcons = "1.7.3"
+
+[libraries]
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
+kotlin-test ={ module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore" }
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
+
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+compose-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "composeIcons" }
+
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
+composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

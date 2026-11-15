@@ -1,0 +1,33 @@
+# Généré par tools/make_samples.py : ne pas modifier à la main.
+# rate = fréquence d'échantillonnage ; puis une ligne par note : instrument, numéro MIDI, nombre de variantes.
+rate 22050
+guitar 37 3
+guitar 40 3
+guitar 42 3
+guitar 45 3
+guitar 48 3
+guitar 51 3
+guitar 54 3
+guitar 57 3
+guitar 60 3
+guitar 63 3
+guitar 66 3
+guitar 69 3
+guitar 72 3
+guitar 75 3
+guitar 78 3
+guitar 81 3
+guitar 84 3
+guitar 86 3
+bass 28 1
+bass 29 1
+bass 30 1
+bass 31 1
+bass 32 1
+bass 33 1
+bass 34 1
+bass 35 1
+bass 36 1
+bass 37 1
+bass 38 1
+bass 39 1
