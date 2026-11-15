@@ -159,9 +159,7 @@ d'accords : il peut proposer une variante valide mais peu usuelle (un Fa `10321x
 accords sur un autre pied que la fondamentale (pas de renversements, pas de « slash chords »).
 
 **Gammes** (`domain/scale/Scale.kt`). Une gamme est une liste d'intervalles ; les modes sont les mêmes notes que la majeure,
-vues d'une autre fondamentale. La position n commence sur le n-ième degré de la gamme, joué sur la corde la plus grave
-(position 1 = la fondamentale, position 2 = le degré suivant…), et couvre quatre cases (`WINDOW_FRETS`) sur toutes les cordes : sept positions pour sept notes, cinq pour une pentatonique, six pour le
-blues. Le dessin se répète à la douzième case. Les noms des notes suivent le réglage « altérations » : avec « dièses et bémols
+vues d'une autre fondamentale. La position n commence sur le n-ième degré de la gamme, joué sur la corde la plus grave (position 1 = la fondamentale, position 2 = le degré suivant…). Sur chaque corde on joue les trois notes de la gamme qui se suivent (deux pour une pentatonique) et la corde d'après reprend à la note suivante : on monte le manche en diagonale, sans sauter ni répéter de note. Do majeur position 1 : Do Ré Mi (cases 8, 10, 12) sur le Mi grave, Fa Sol La sur le La, Si Do Ré sur le Ré, Mi Fa Sol sur le Sol, La Si Do sur le Si, Ré Mi Fa sur le Mi aigu. Toutes les notes d'une position sont pleinement affichées ; les notes des cases voisines qui n'en font pas partie restent en filigrane. Sept positions pour sept notes, cinq pour une pentatonique ; le blues reprend les cinq positions de la pentatonique mineure et y glisse sa note bleue (♭5) entre deux notes voisines. Au sillet, si une corde devait commencer sous sa corde à vide, le dessin se joue une octave plus haut. Le dessin se répète à la douzième case. Les noms des notes suivent le réglage « altérations » : avec « dièses et bémols
 ensemble », le Mi♭ du Do dorien s'écrit « Ré♯/Mi♭ » (l'orthographe propre à chaque tonalité n'est pas faite).
 
 ## Accordeur

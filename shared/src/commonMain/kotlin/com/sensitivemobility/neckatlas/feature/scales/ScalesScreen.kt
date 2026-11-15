@@ -95,8 +95,9 @@ fun ScalesScreen(settings: AppSettings, onChange: ((AppSettings) -> AppSettings)
     }
     val shown = remember(board, scale, shownZone) { ScalePositions.allNotes(board, shownZone, scale) }
     val markers = remember(shown, position, showNames, type) {
+        val members = position?.notes?.map { it.position }?.toSet()
         shown.map { note ->
-            val inside = position == null || note.position.fret in position.firstFret..position.lastFret
+            val inside = members == null || note.position in members
             NeckMarker(
                 position = note.position,
                 kind = if (note.degree == 0) MarkerKind.ROOT else MarkerKind.SCALE,
@@ -111,8 +112,7 @@ fun ScalesScreen(settings: AppSettings, onChange: ((AppSettings) -> AppSettings)
         if (position == null) {
             ScalePositions.ascending(board, shown)
         } else {
-            shown.filter { it.position.fret in position.firstFret..position.lastFret }
-                .map { board.pitchAt(it.position) }
+            position.notes.map { board.pitchAt(it.position) }
                 .distinctBy { it.midi }
                 .sortedBy { it.midi }
         }

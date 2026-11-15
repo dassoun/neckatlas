@@ -94,46 +94,112 @@ class ScaleTest {
         val board = Fretboard(Instrument.GUITAR_6)
         assertEquals(7, ScalePositions.find(board, Scale(Do, ScaleType.MAJOR)).size)
         assertEquals(5, ScalePositions.find(board, Scale(La, ScaleType.MINOR_PENTATONIC)).size)
-        assertEquals(6, ScalePositions.find(board, Scale(La, ScaleType.BLUES)).size)
+        // Le blues est une pentatonique mineure et sa note bleue : cinq positions.
+        assertEquals(5, ScalePositions.find(board, Scale(La, ScaleType.BLUES)).size)
+    }
+
+    private val everyCase = buildList {
+        for (instrument in Instrument.entries) for (type in ScaleType.entries) for (root in 0..11) add(Triple(instrument, type, root))
     }
 
     @Test
-    fun positionNStartsOnDegreeNOfTheScaleOnTheLowStringAndIsFourFretsWide() {
-        val board = Fretboard(Instrument.GUITAR_6)
-        val scale = Scale(Do, ScaleType.MAJOR)
-        val positions = ScalePositions.find(board, scale)
-        positions.forEachIndexed { index, position ->
-            assertEquals(index, scale.degreeOf(board.pitchAt(FretPosition(0, position.firstFret)).pitchClass))
+    fun positionNStartsOnDegreeNOnTheLowString() {
+        for ((instrument, type, root) in everyCase) {
+            val board = Fretboard(instrument)
+            val scale = Scale(root, type)
+            val positions = ScalePositions.find(board, scale)
+            assertEquals(type.coreDegrees.size, positions.size, "$instrument $type $root")
+            positions.forEachIndexed { index, position ->
+                val first = position.notes.first { it.position.string == 0 }
+                assertEquals(type.coreDegrees[index], first.degree, "$instrument $type $root position ${index + 1}")
+                assertTrue(first.position.fret in 0..23 && (first.position.fret % 12) == (0..11).first { board.pitchAt(FretPosition(0, it)).pitchClass == first.let { n -> scale.pitchClasses[n.degree] } }, "$instrument $type $root position ${index + 1} : case ${first.position.fret}")
+            }
         }
-        for (position in positions) {
-            assertEquals(ScalePositions.WINDOW_FRETS - 1, position.lastFret - position.firstFret)
-            assertTrue(scale.degreeOf(board.pitchAt(FretPosition(0, position.firstFret)).pitchClass) != null)
-            assertTrue(position.notes.all { it.position.fret in position.firstFret..position.lastFret })
-        }
-        // Mi grave : Do (8), Ré (10), Mi (0), Fa (1), Sol (3), La (5), Si (7).
-        assertEquals(listOf(8, 10, 0, 1, 3, 5, 7), positions.map { it.firstFret })
     }
 
     @Test
-    fun eachPositionHasTwoOrThreeNotesOnEveryStringForADiatonicScale() {
+    fun theFirstPositionOfCMajorIsTheClassicOne() {
         val board = Fretboard(Instrument.GUITAR_6)
-        for (root in 0..11) {
-            for (position in ScalePositions.find(board, Scale(root, ScaleType.MAJOR))) {
-                for (string in 0 until 6) {
-                    val onString = position.notes.count { it.position.string == string }
-                    assertTrue(onString in 2..3, "racine $root, cases ${position.firstFret}-${position.lastFret}, corde $string : $onString notes")
+        val first = ScalePositions.find(board, Scale(Do, ScaleType.MAJOR)).first()
+        // Mi grave : Do Ré Mi (8, 10, 12) ; La : Fa Sol La (8, 10, 12) ; Ré : Si Do Ré (9, 10, 12) ; Sol : Mi Fa Sol (9, 10, 12) ;
+        // Si : La Si Do (10, 12, 13) ; Mi aigu : Ré Mi Fa (10, 12, 13).
+        val expected = listOf(
+            listOf(8, 10, 12), listOf(8, 10, 12), listOf(9, 10, 12), listOf(9, 10, 12), listOf(10, 12, 13), listOf(10, 12, 13),
+        )
+        for (string in 0 until 6) {
+            assertEquals(expected[string], first.notes.filter { it.position.string == string }.map { it.position.fret }, "corde $string")
+        }
+        // Le 3e degré (Mi) y est : sur la corde grave, case 12, et sur la corde de Sol, case 9.
+        assertTrue(first.notes.any { it.degree == 2 })
+    }
+
+    @Test
+    fun everyPositionOfEveryScaleHasEveryDegreeAndTheSameNumberOfNotesOnEachString() {
+        for ((instrument, type, root) in everyCase) {
+            val board = Fretboard(instrument)
+            val scale = Scale(root, type)
+            val perString = if (type.coreDegrees.size >= 7) 3 else 2
+            ScalePositions.find(board, scale).forEachIndexed { index, position ->
+                val where = "$instrument $type $root position ${index + 1}"
+                // Tous les degrés de la gamme (hors note de passage) sont dans la position : aucun degré ne manque.
+                assertTrue(position.notes.map { it.degree }.toSet().containsAll(type.coreDegrees), "$where : degrés ${position.notes.map { it.degree }.toSet()}")
+                for (string in 0 until instrument.stringCount) {
+                    val core = position.notes.filter { it.position.string == string && it.degree !in type.passing }
+                    assertEquals(perString, core.size, "$where, corde $string")
+                }
+                // Que des notes de la gamme, sans doublon, sur le manche.
+                assertTrue(position.notes.all { scale.degreeOf(board.pitchAt(it.position).pitchClass) == it.degree }, where)
+                assertEquals(position.notes.size, position.notes.map { it.position }.toSet().size, where)
+                assertTrue(position.notes.all { it.position.fret in 0..FretZone.MAX_FRET }, where)
+            }
+        }
+    }
+
+    @Test
+    fun notesOnAStringFollowEachOtherInTheScaleWithoutSkippingOne() {
+        for ((instrument, type, root) in everyCase) {
+            val board = Fretboard(instrument)
+            val scale = Scale(root, type)
+            ScalePositions.find(board, scale).forEachIndexed { index, position ->
+                for (string in 0 until instrument.stringCount) {
+                    val frets = position.notes.filter { it.position.string == string && it.degree !in type.passing }.map { it.position.fret }.sorted()
+                    val between = (frets.min()..frets.max()).count {
+                        val d = scale.degreeOf(board.pitchAt(FretPosition(string, it)).pitchClass)
+                        d != null && d !in type.passing
+                    }
+                    assertEquals(frets.size, between, "$instrument $type $root position ${index + 1}, corde $string : cases $frets")
                 }
             }
         }
     }
 
     @Test
-    fun positionsTogetherCoverEveryScaleNoteOfTheFirstOctave() {
+    fun aPositionStaysUnderTheHand() {
+        // Quatre cases d'écart au plus par corde, et un dessin d'au plus huit cases de large (la seconde augmentée de la mineure harmonique l'étire) : pas d'éparpillement.
+        for ((instrument, type, root) in everyCase) {
+            val board = Fretboard(instrument)
+            ScalePositions.find(board, Scale(root, type)).forEachIndexed { index, position ->
+                val where = "$instrument $type $root position ${index + 1}"
+                assertTrue(position.lastFret - position.firstFret <= 7, "$where : cases ${position.firstFret}-${position.lastFret}")
+                for (string in 0 until instrument.stringCount) {
+                    val frets = position.notes.filter { it.position.string == string }.map { it.position.fret }
+                    assertTrue(frets.max() - frets.min() <= 4, "$where, corde $string : $frets")
+                }
+            }
+        }
+    }
+
+    @Test
+    fun theBlueNoteSitsBetweenTwoNotesOfAPentatonicBox() {
         val board = Fretboard(Instrument.GUITAR_6)
-        val scale = Scale(Sol, ScaleType.MAJOR)
-        val covered = ScalePositions.find(board, scale).flatMap { p -> p.notes.map { it.position } }.toSet()
-        val expected = ScalePositions.allNotes(board, FretZone(0, 12), scale).map { it.position }.toSet()
-        assertTrue(covered.containsAll(expected), "notes de la gamme sans position : ${expected - covered}")
+        val scale = Scale(La, ScaleType.BLUES)
+        val box1 = ScalePositions.find(board, scale).first()
+        // La mineur : le Mi♭ (♭5, degré 3) est case 6 de la corde de Ré, entre le Ré (5) et le Mi (7).
+        assertTrue(box1.notes.any { it.degree == 3 })
+        assertTrue(box1.notes.filter { it.degree == 3 }.all { note ->
+            val others = box1.notes.filter { it.position.string == note.position.string && it.degree != 3 }.map { it.position.fret }
+            note.position.fret in others.min()..others.max()
+        })
     }
 
     @Test
